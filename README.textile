@@ -1,0 +1,141 @@
+h1. Uploadable Behavior Plugin
+
+Save random data in a key-value format.
+
+h2. Requirements
+
+* PHP 5.2
+* CakePHP 2.0+
+
+h2. Installation
+
+_[Manual]_
+
+# Download this: http://github.com/mdunham/Uploadable-Behavior/zipball/master
+# Unzip that download.
+# Copy the resulting folder to app/Plugin
+# Rename the folder you just copied to @Uploadable@
+
+_[GIT Submodule]_
+
+In your app directory, type:
+<pre><code>git submodule add git://github.com/mdunham/Uploadable-Behavior.git Plugin/Uploadable
+git submodule init
+git submodule update
+</code></pre>
+
+_[GIT Clone]_
+
+In your plugin directory, type:
+<pre><code>git clone git://github.com/mdunham/Uploadable-Behavior.git Uploadable</code></pre>
+
+h2. Usage
+
+For a real world example lets say I have a model named Recipe and it contains a field named photo. I want photo to be an uploaded file so I setup my model:
+
+	<?php
+
+	/**
+	 * Recipe Model
+	 */
+	class Recipe extends AppModel {
+
+		/**
+		 * Define the behavior of this model
+		 * 
+		 * @var array 
+		 */
+		public $actsAs = array('Uploadable.Uploadable');
+	}
+	
+	?>
+
+Now I need to create my add.ctp page:
+
+	<?php
+		echo $this->Form->create('Recipe', array('enctype' => 'multipart/form-data')); 
+		echo $this->Form->input('title');
+		echo $this->Form->input('photo', array('type' => 'file'));
+		echo $this->Form->end(__('Submit'));
+	?>
+
+Thats all I need to do to allow images to be uploaded. In my controller the code is the same:
+
+	public function admin_add() {
+		if ($this->request->is('post')) {
+			$this->Recipe->create();
+			if ($this->Recipe->save($this->request->data)) {
+				$this->Session->setFlash(__('The recipe has been saved'));
+				$this->redirect(array('action' => 'index'));
+			} else {
+				$this->Session->setFlash(__('The recipe could not be saved. Please, try again.'));
+			}
+		}
+		$recipeCategories = $this->Recipe->RecipeCategory->find('list');
+		$this->set(compact('recipeCategories'));
+	}
+
+h2. Options
+
+Special Configuration
+
+Example of a configuration:
+
+This is the default which default will get applied to all fields:
+
+	$defaults = array(
+		'default' => array(
+			'accept' => array(
+				'image/jpeg' => array('jpg', 'jpeg'),
+				'image/gif' => array('gif'),
+				'image/png' => array('png')
+			),
+			'path' => 'media',
+			'prefix' => 'upload'
+		)
+	);
+
+In your model you can define many options specifically if you want this to only work on a specific field rather than all just set defaults accept param to false:
+
+	$actsAs = array(
+		'Uploadable' => array(
+			'default' => array('accept' => false),
+			'photo' => array(
+				'accept' => array(
+					'image/jpeg' => array('jpg', 'jpeg'),
+					'image/gif' => array('gif'),
+					'image/png' => array('png')
+				),
+				'path' => 'media',
+				'prefix' => 'upload'
+			)
+		)
+	);
+
+
+h2. Todo
+
+* Better Readme
+* Unit Tests
+
+h2. License
+
+Copyright (c) 2011 Matthew Dunham
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
